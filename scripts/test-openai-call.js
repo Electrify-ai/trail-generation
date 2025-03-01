@@ -98,7 +98,7 @@ window.addEventListener('load', async () => {
 async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
     console.log('Calling OpenAI API...');
     
-    const prompt = 'Provide a JSON object with a single field "name" containing the name of a trail.';
+    const prompt = 'Provide the name of a walking trail.';
 
     try {
         console.log('Sending request to OpenAI:');
