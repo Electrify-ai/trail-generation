@@ -175,8 +175,9 @@ document.getElementById('generate-trail-button').addEventListener('click', async
         return;
     }
 
-    // Parse the starting point coordinates
+    // Parse the starting point coordinates into an array of numbers
     const coords = startingPointCoords.split(',').map(Number);
+    console.log('Parsed coords:', coords); // Debugging
 
     try {
         // Call OpenAI API to generate trail
