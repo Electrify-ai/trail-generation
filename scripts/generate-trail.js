@@ -45,6 +45,7 @@ function initializeMapbox(mapboxAccessToken) {
         startingPointCoords = [e.lngLat.lng, e.lngLat.lat];
         document.getElementById('starting-point-coords').value = startingPointCoords;
         new mapboxgl.Marker().setLngLat(startingPointCoords).addTo(map);
+        console.log('Starting point selected:', startingPointCoords); // Log the selected coordinates
     });
 
     return { map, startingPointCoords };
@@ -193,18 +194,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             const duration = document.getElementById('duration').value;
             const difficulty = document.getElementById('difficulty').value;
 
+            // Get the current starting point coordinates from the hidden input
+            const startingPointCoords = document.getElementById('starting-point-coords').value;
+
             // Check if a starting point has been selected
             if (!startingPointCoords) {
                 alert('Please select a starting point on the map.');
                 return;
             }
 
+            // Parse the starting point coordinates
+            const coords = startingPointCoords.split(',').map(Number);
+
             try {
                 // Call OpenAI API to generate trail
-                const trailData = await generateTrailWithAI(startingPointCoords, transportMode, duration, difficulty, openAiApiKey);
+                const trailData = await generateTrailWithAI(coords, transportMode, duration, difficulty, openAiApiKey);
                 if (trailData) {
                     displayTrailDetails(trailData);
-                    console.log('Trail generated.', trailData);
                 }
             } catch (error) {
                 console.error('Error generating trail:', error);
