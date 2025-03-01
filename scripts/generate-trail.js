@@ -204,6 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const trailData = await generateTrailWithAI(startingPointCoords, transportMode, duration, difficulty, openAiApiKey);
                 if (trailData) {
                     displayTrailDetails(trailData);
+                    console.log('Trail generated.', trailData);
                 }
             } catch (error) {
                 console.error('Error generating trail:', error);
