@@ -98,18 +98,13 @@ window.addEventListener('load', async () => {
 async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
     console.log('Calling OpenAI API...');
     
-    const prompt = 'Provide the name of a walking trail.';
+    const prompt = 'Provide a JSON object with a single field "name" containing the name of a trail.';
 
     try {
-        console.log('Sending request to OpenAI:');
-        console.log('Prompt:', prompt);
-        console.log('API Key:', apiKey);
-
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch('/.netlify/functions/openai-proxy', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
                 model: 'gpt-3.5-turbo',
@@ -133,7 +128,7 @@ async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
         return data;
     } catch (error) {
         console.error('Error:', error);
-        throw error; // Re-throw the error to handle it in the calling function
+        throw error;
     }
 }
 
