@@ -14,21 +14,15 @@ async function fetchSupabaseConfig() {
 }
 
 // Function to fetch secrets (OpenAI API key and Mapbox access token)
-async function fetchSecrets(supabaseUrl, supabaseKey) {
+async function fetchSecrets() {
     try {
-        const response = await fetch('/.netlify/functions/fetch-secrets', {
-            method: 'POST', // Use POST to send credentials in the body
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ supabaseUrl, supabaseKey }), // Pass credentials
-        });
-
+        const response = await fetch('/.netlify/functions/fetch-secrets');
         if (!response.ok) {
             throw new Error(`Failed to fetch secrets: ${response.status}`);
         }
-
-        return await response.json();
+        const secrets = await response.json();
+        console.log('Fetched Mapbox access token:', secrets.mapboxAccessToken); // Debugging
+        return secrets;
     } catch (error) {
         console.error('Error fetching secrets:', error);
         alert('Failed to initialize application. Please try again.');
@@ -36,8 +30,15 @@ async function fetchSecrets(supabaseUrl, supabaseKey) {
     }
 }
 
-// Function to initialize Mapbox and handle starting point selection
+// Function to initialize Mapbox
 function initializeMapbox(mapboxAccessToken) {
+    console.log('Initializing Mapbox with token:', mapboxAccessToken); // Debugging
+
+    if (!mapboxAccessToken) {
+        console.error('Mapbox access token is missing');
+        return;
+    }
+
     mapboxgl.accessToken = mapboxAccessToken;
     const map = new mapboxgl.Map({
         container: 'map-view',
@@ -158,35 +159,63 @@ function updateMapLine(waypoints) {
 }
 
 // Main initialization function
-document.getElementById('generate-trail-button').addEventListener('click', async () => {
-    console.log('Generate Trail button clicked.');
-
-    // Get user inputs
-    const transportMode = document.getElementById('transport-mode').value;
-    const duration = document.getElementById('duration').value;
-    const difficulty = document.getElementById('difficulty').value;
-
-    // Get the current starting point coordinates from the hidden input
-    const startingPointCoords = document.getElementById('starting-point-coords').value;
-
-    // Check if a starting point has been selected
-    if (!startingPointCoords) {
-        alert('Please select a starting point on the map.');
-        return;
-    }
-
-    // Parse the starting point coordinates into an array of numbers
-    const coords = startingPointCoords.split(',').map(Number);
-    console.log('Parsed coords:', coords); // Debugging
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Page fully loaded. Initializing application...');
 
     try {
-        // Call OpenAI API to generate trail
-        const trailData = await generateTrailWithAI(coords, transportMode, duration, difficulty, openAiApiKey);
-        if (trailData) {
-            displayTrailDetails(trailData);
+        // Fetch Supabase credentials
+        const { supabaseUrl, supabaseKey } = await fetchSupabaseConfig();
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        console.log('Supabase initialized:', supabaseClient);
+
+        // Fetch secrets (OpenAI API key and Mapbox access token)
+        const { openAiApiKey, mapboxAccessToken } = await fetchSecrets();
+        console.log('Fetched secrets:', { openAiApiKey, mapboxAccessToken });
+
+        // Initialize Mapbox and get the map instance
+        const { map, startingPointCoords } = initializeMapbox(mapboxAccessToken);
+        if (!map) {
+            throw new Error('Failed to initialize Mapbox');
         }
+        console.log('Mapbox initialized:', map);
+
+        // Generate Trail Button Event Listener
+        document.getElementById('generate-trail-button').addEventListener('click', async () => {
+            console.log('Generate Trail button clicked.');
+
+            // Get user inputs
+            const transportMode = document.getElementById('transport-mode').value;
+            const duration = document.getElementById('duration').value;
+            const difficulty = document.getElementById('difficulty').value;
+
+            // Get the current starting point coordinates from the hidden input
+            const startingPointCoords = document.getElementById('starting-point-coords').value;
+
+            // Check if a starting point has been selected
+            if (!startingPointCoords) {
+                alert('Please select a starting point on the map.');
+                return;
+            }
+
+            // Parse the starting point coordinates into an array of numbers
+            const coords = startingPointCoords.split(',').map(Number);
+            console.log('Parsed coords:', coords);
+
+            try {
+                // Call OpenAI API to generate trail
+                const trailData = await generateTrailWithAI(coords, transportMode, duration, difficulty, openAiApiKey);
+                if (trailData) {
+                    displayTrailDetails(trailData);
+                }
+            } catch (error) {
+                console.error('Error generating trail:', error);
+                alert('Failed to generate trail. Please try again.');
+            }
+        });
+
+        console.log('Application initialized successfully.');
     } catch (error) {
-        console.error('Error generating trail:', error);
-        alert('Failed to generate trail. Please try again.');
+        console.error('Initialization error:', error);
+        alert('Failed to initialize application. Please try again.');
     }
 });
