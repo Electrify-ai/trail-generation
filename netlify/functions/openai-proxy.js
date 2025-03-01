@@ -1,4 +1,6 @@
 // /.netlify/functions/openai-proxy.js
+const fetch = require('node-fetch'); // Add node-fetch
+
 exports.handler = async (event, context) => {
     const apiKey = process.env.OPENAI_API_KEY;
 

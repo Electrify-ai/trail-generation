@@ -14,6 +14,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.1"
+    "@supabase/supabase-js": "^2.49.1",
+    "node-fetch": "^3.3.2"
   }
 }
