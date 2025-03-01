@@ -1,10 +1,9 @@
 // fetch-secrets.js
+
 const { createClient } = require('@supabase/supabase-js');
-const fetch = require('node-fetch'); // Add node-fetch
 
 exports.handler = async function (event, context) {
     // Parse the incoming request body to get Supabase credentials
-    
     const { supabaseUrl, supabaseKey } = JSON.parse(event.body || '{}');
     console.log('supabase url',supabaseUrl);
 
