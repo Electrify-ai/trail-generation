@@ -66,6 +66,9 @@
         new mapboxgl.Marker().setLngLat(startingPointCoords).addTo(map);
     });
 
+
+
+
     // Generate Trail Button
     document.getElementById('generate-trail-button').addEventListener('click', async () => {
         console.log('Generate Trail button clicked.');
@@ -80,64 +83,49 @@
         }
 
         try {
-            const trailData = await generateTrailWithAI(startingPointCoords, transportMode, duration, difficulty);
-            if (trailData) {
-                displayTrailDetails(trailData);
+            
+            const prompt = `Provide the capital city of queensland, australia.`;
+            
+            const openAiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{ role: "user", content: prompt }],
+                    max_tokens: 50,
+                    temperature: 1.0, // Higher temperature for more randomness
+                    top_p: 0.8,
+                }),
+            });
+    
+            if (!openAiResponse.ok) {
+                throw new Error(`OpenAI API request failed with status ${openAiResponse.status}`);
             }
+    
+            const dataResponse = await openAiResponse.json();
+            if (dataResponse.choices && dataResponse.choices.length > 0) {
+                
+                console.log('OpenAI response:', dataResponse);
+
+                // Display API output
+                trailData = dataResponse;
+            } else {
+                throw new Error("No quote received from API");
+            }
+    
+
+
         } catch (error) {
             console.error('Error generating trail:', error);
             alert('Failed to generate trail. Please try again.');
+        
+        
+        
         }
     });
-
-    async function generateTrailWithAI(coords, mode, duration, difficulty) {
-        console.log('Calling OpenAI API via proxy...');
-        
-        const prompt = `Generate a trail starting at coordinates ${coords.join(', ')} with the following criteria:
-- Mode of transport: ${mode}
-- Duration: ${duration}
-- Difficulty: ${difficulty}
-
-Provide the trail details in JSON format with the following fields:
-- name: The name of the trail
-- theme: The theme of the trail
-- mode: The mode of transport
-- distance: The distance of the trail
-- difficulty: The difficulty level
-- description: A description of the trail
-- waypoints: An array of waypoints, each with a name and coordinates`;
-
-        try {
-            const response = await fetch('/.netlify/functions/openai-proxy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    model: 'gpt-3.5-turbo',
-                    messages: [{ role: 'user', content: prompt }],
-                    max_tokens: 200,
-                    temperature: 0.7,
-                    response_format: { type: 'json_object' },
-                }),
-            });
-
-            const responseText = await response.text();
-            console.log('OpenAI response:', responseText);
-
-            if (!response.ok) {
-                throw new Error(`API request failed: ${response.status} - ${responseText}`);
-            }
-
-            const data = JSON.parse(responseText);
-            console.log('Parsed data:', data);
-
-            return data;
-        } catch (error) {
-            console.error('Error:', error);
-            throw error;
-        }
-    }
 
     function displayTrailDetails(trailData) {
         console.log('Displaying trail details:', trailData);
