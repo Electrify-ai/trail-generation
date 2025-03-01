@@ -1,3 +1,69 @@
+// Fetch Supabase URL and key from Netlify environment variables
+let supabaseUrl, supabaseKey;
+
+try {
+    // Fetch credentials from Netlify Function
+    const response = await fetch('/.netlify/functions/fetch-supabase-config');
+    if (!response.ok) {
+        throw new Error(`Failed to fetch credentials: ${response.status}`);
+    }
+
+    const data = await response.json();
+    supabaseUrl = data.supabaseUrl;
+    supabaseKey = data.supabaseKey;
+
+    if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Missing Supabase credentials.');
+    }
+} catch (error) {
+    console.error('Error fetching Supabase credentials:', error);
+    alert('Could not initialize Supabase. Please try again.');
+    return;
+}
+
+// Initialize Supabase client
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+console.log('Supabase initialized:', supabaseClient);
+
+// Fetch secrets (OpenAI API key and Mapbox access token) from Netlify function
+let openAiApiKey, mapboxAccessToken;
+try {
+    const secretsResponse = await fetch('/.netlify/functions/fetch-secrets');
+    if (!secretsResponse.ok) {
+        throw new Error(`Failed to fetch secrets: ${secretsResponse.status}`);
+    }
+
+    const secretsData = await secretsResponse.json();
+    openAiApiKey = secretsData.openAiApiKey;
+    mapboxAccessToken = secretsData.mapboxAccessToken;
+
+    if (!openAiApiKey || !mapboxAccessToken) {
+        throw new Error('Failed to retrieve secrets from Supabase.');
+    }
+} catch (error) {
+    console.error('Error fetching secrets:', error);
+    alert('Failed to initialize application. Please try again.');
+    return;
+}
+
+// Initialize Mapbox with the fetched access token
+mapboxgl.accessToken = mapboxAccessToken;
+const map = new mapboxgl.Map({
+    container: 'map-view',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [153.0260, -27.4705], // Brisbane, Australia coordinates
+    zoom: 12, // Adjust zoom level as needed
+});
+
+let startingPointCoords = null;
+
+// Add map click event to set starting point
+map.on('click', (e) => {
+    startingPointCoords = [e.lngLat.lng, e.lngLat.lat];
+    document.getElementById('starting-point-coords').value = startingPointCoords;
+    new mapboxgl.Marker().setLngLat(startingPointCoords).addTo(map);
+});
+
 document.getElementById('generate-trail-button').addEventListener('click', async () => {
     console.log('Generate Trail button clicked.');
 
