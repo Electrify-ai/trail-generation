@@ -2,3 +2,4 @@
     functions = "netlify/functions"
 [functions]
     external_node_modules = ["@supabase/supabase-js"]
+    generate-trail-with-ai.timeout = 30
