@@ -1,0 +1,134 @@
+/* styles/generate-trail.css */
+
+/* Reuse styles from create-trail.css */
+@import url('create-trail.css');
+
+/* Additional styles for generate-trail page */
+.generate-trail {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 1400px; /* Ensure the container is wide */
+    width: 90%; /* Make the container take up 90% of the screen width */
+}
+
+.input-panels {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    width: 100%; /* Ensure the panels take up the full width of the container */
+}
+
+.panel {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-panel {
+    width: 40%; /* Set a fixed width for the form panel */
+}
+
+.map-panel {
+    width: 60%; /* Set a fixed width for the map panel */
+    flex-grow: 1; /* Allow the map panel to grow if there's extra space */
+}
+
+.map-view {
+    height: 500px; /* Increased height for the map */
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+#trail-criteria-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.form-group select,
+.form-group button {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.form-group button {
+    background-color: #6c5ce7;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.form-group button:hover {
+    background-color: #5a4ac7;
+}
+
+/* Output Panels (View Trail) */
+.trail-details {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    width: 100%; /* Ensure the output panels span the full width */
+    max-width: none; /* Remove any max-width constraints */
+}
+
+.trail-details .panel {
+    flex: 1; /* Each panel takes equal width */
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#subway-diagram {
+    height: 400px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    overflow-y: auto;
+}
+
+#trail-map-view {
+    height: 400px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .input-panels {
+        flex-direction: column;
+    }
+
+    .form-panel,
+    .map-panel {
+        width: 100%; /* Full width on smaller screens */
+    }
+
+    .trail-details {
+        flex-direction: column; /* Stack output panels vertically on smaller screens */
+    }
+
+    .trail-details .panel {
+        width: 100%; /* Full width for each panel on smaller screens */
+    }
+}

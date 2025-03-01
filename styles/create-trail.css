@@ -1,0 +1,387 @@
+/* Ensure the body takes up the full height of the viewport */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    min-height: 100vh; /* Ensure the body takes at least the full viewport height */
+}
+
+.header {
+    background-color: #6c5ce7; /* Brighter color */
+    color: white;
+    padding: 20px 0;
+    font-size: 32px;
+    text-align: center;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+}
+
+/* Ensure the container takes up the remaining space */
+.container {
+    display: flex;
+    flex-grow: 1; /* Allow the container to grow and take up remaining space */
+    width: 100%;
+    padding-top: 80px; /* Adjusted for fixed header */
+}
+
+#sidebar {
+    width: 800px;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative; /* Removed fixed position */
+    top: 0;
+    bottom: 0;
+    border-right: 2px solid #ddd;
+}
+
+/* Subway Diagram Panel */
+.subway-panel {
+    padding: 20px; /* Match form section */
+    background-color: #f9f9f9; /* Match the background color of the forms section */
+}
+
+/* Map View Panel */
+.map-panel {
+    padding: 20px; /* Match form section */
+    background-color: #f9f9f9; /* Match the background color of the forms section */
+}
+
+#subway-diagram {
+    height: 600px; /* Set a fixed height for the container */
+    background-color: #ffffff; /* Match form section */
+    padding: 20px; /* Match form section */
+    border-radius: 10px; /* Match form section */
+    border: 1px solid #ddd;
+    overflow-y: auto; /* Enable vertical scrolling */
+    position: relative; /* Ensure child elements are positioned relative to this container */
+}
+
+.station {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 10px solid #ddd;
+    position: relative;
+    text-align: center;
+    line-height: 40px; /* Ensuring the label is centered vertically */
+    color: black;
+    font-weight: bold;
+    display: inline-block;
+    left: 25%;
+    transform: none; /* Center the circle horizontally */
+}
+
+/* Style for station labels */
+.station-label {
+    position: absolute;
+    left: 60px; /* Ensure text is positioned to the right of the station */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px; /* Adjust font size as needed */
+    font-weight: bold;
+    max-width: 150px; /* Limit the width of the label */
+    white-space: normal; /* Allow text to wrap */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis for overflow */
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to two lines */
+    -webkit-box-orient: vertical;
+    line-height: 1.2; /* Adjust line height for better readability */
+}
+
+.delete-btn {
+    position: absolute;
+    right: -10px; /* Adjusted to avoid overlap */
+    top: -5px;
+    background: red;
+    color: white;
+    border: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 18px;
+    text-align: center;
+}
+
+/* Style for lines between stations */
+.line {
+    position: absolute;
+    background-color: #888; /* Default line color */
+    height: 5px; /* Line thickness */
+    transform-origin: 0 0; /* Set the transform origin to the start of the line */
+}
+
+#sidebar form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#sidebar input, #sidebar button {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#sidebar button {
+    background-color: #6c5ce7; /* Same as header for consistency */
+    color: white;
+    cursor: pointer;
+    border: none;
+    font-weight: bold;
+}
+
+#sidebar button:hover {
+    background-color: #5a4ac7; /* Slightly darker on hover */
+}
+
+#sidebar input {
+    width: 90%;
+    border-radius: 5px;
+}
+
+#sidebar button:focus, #sidebar input:focus {
+    outline: none;
+    border-color: #6c5ce7;
+}
+
+/* Form Sections Layout */
+.form-sections {
+    display: flex;
+    gap: 20px; /* Space between columns */
+    margin-bottom: 20px; /* Space before the back button */
+}
+
+.form-section {
+    flex: 1; /* Each section takes equal width */
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Group Styling */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Ensure all form inputs and select elements have the same width */
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%; /* Make all inputs and selects take up 100% of their container's width */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* Include padding and border in the element's total width */
+}
+
+.form-group textarea {
+    resize: vertical; /* Allow vertical resizing */
+}
+
+/* Input with Unit (e.g., Trail Length, Estimated Duration) */
+.input-with-unit {
+    display: flex;
+    gap: 10px;
+}
+
+.input-with-unit input {
+    flex: 1;
+}
+
+.input-with-unit select {
+    width: 80px;
+}
+
+/* Buttons */
+.btn-secondary {
+    background-color: #6c5ce7;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.btn-secondary:hover {
+    background-color: #5a4ac7;
+}
+
+.btn-primary {
+    background-color: #6c5ce7;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.btn-primary:hover {
+    background-color: #5a4ac7;
+}
+
+/* Back Button */
+.btn-back {
+    display: inline-block;
+    margin-top: 20px;
+    color: #6c5ce7;
+    font-weight: bold;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    text-decoration: underline;
+}
+
+/* Add spacing between columns */
+#trail-form {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Ensures three equal columns */
+    gap: 20px; /* Adjust column spacing */
+    padding: 10px; /* Adds space around the form */
+}
+
+/* Ensure each section has padding for spacing */
+.form-section {
+    padding: 15px; /* Creates internal space inside each section */
+    background-color: #f9f9f9; /* Optional: Adds subtle background for separation */
+    border-radius: 8px; /* Optional: Rounds corners for a cleaner look */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); /* Optional: Adds depth */
+}
+
+/* Ensure form fields have proper spacing */
+.form-group {
+    margin-bottom: 15px; /* Adds space between input fields */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    #trail-form {
+        grid-template-columns: repeat(2, 1fr); /* Two columns on medium screens */
+        gap: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    #trail-form {
+        grid-template-columns: 1fr; /* Stack in a single column on small screens */
+        gap: 15px;
+    }
+}
+
+/* Style for disabled input fields */
+input:disabled,
+textarea:disabled {
+    background-color: #f0f0f0; /* Light grey background */
+    color: #a0a0a0; /* Light grey text */
+    cursor: not-allowed; /* Not-allowed cursor */
+    border: 1px solid #d0d0d0; /* Light grey border */
+}
+
+/* Style for disabled buttons */
+button:disabled {
+    background-color: #e0e0e0; /* Light grey background */
+    color: #a0a0a0; /* Light grey text */
+    cursor: not-allowed; /* Not-allowed cursor */
+    border: 1px solid #d0d0d0; /* Light grey border */
+}
+
+/* Style for disabled file input */
+input[type="file"]:disabled {
+    background-color: #f0f0f0; /* Light grey background */
+    color: #a0a0a0; /* Light grey text */
+    cursor: not-allowed; /* Not-allowed cursor */
+    border: 1px solid #d0d0d0; /* Light grey border */
+}
+
+/* Add a tooltip for disabled fields */
+.disabled-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.disabled-tooltip::after {
+    content: "Please create a starting point first.";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.disabled-tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Style for read-only input fields */
+input[readonly] {
+    background-color: #f0f0f0; /* Light grey background */
+    color: #333; /* Dark grey text */
+    cursor: not-allowed; /* Not-allowed cursor */
+    border: 1px solid #d0d0d0; /* Light grey border */
+}
+
+/* Style for disabled panel */
+.disabled-panel {
+    opacity: 0.6; /* Grey out the panel */
+    pointer-events: none; /* Disable pointer events */
+}
+
+/* Style for disabled input fields */
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled {
+    background-color: #f0f0f0; /* Light grey background */
+    color: #a0a0a0; /* Light grey text */
+    cursor: not-allowed; /* Not-allowed cursor */
+    border: 1px solid #d0d0d0; /* Light grey border */
+}
+
+/* Style for map markers */
+.mapboxgl-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff; /* White text for better contrast */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Add a shadow for better readability */
+}

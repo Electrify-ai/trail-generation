@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrailTree | Generate Trail</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/create-trail.css">
+    <link rel="stylesheet" href="styles/generate-trail.css">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar (Same as index.html) -->
+    <nav class="navbar">
+        <div class="logo">TrailTree - System Generated</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="trails.html">Trails</a></li>
+            <li><a href="create-trail.html">Create</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="store.html">Store</a></li> <!-- New Store Link -->
+        </ul>
+    </nav>
+
+    <!-- Generate Trail Section -->
+    <section class="generate-trail">
+        <div class="input-panels">
+            <!-- Panel 1: Form Inputs -->
+            <div class="panel form-panel">
+                <h2>Trail Criteria</h2>
+                <form id="trail-criteria-form">
+                    <div class="form-group">
+                        <label for="transport-mode">Mode of Transport:</label>
+                        <select id="transport-mode" required>
+                            <option value="walking">Walking</option>
+                            <option value="cycling">Cycling</option>
+                            <option value="driving">Driving</option>
+                            <option value="flying">Flying</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty Level:</label>
+                        <select id="difficulty" required>
+                            <option value="easy">Easy</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="challenging">Challenging</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Duration:</label>
+                        <select id="duration" required>
+                            <option value="0-1">0-1 hour</option>
+                            <option value="1-3">1-3 hours</option>
+                            <option value="3-5">3-5 hours</option>
+                            <option value="5-8">5-8 hours</option>
+                            <option value="8-13">8-13 hours</option>
+                            <option value="13-21">13-21 hours</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="generate-trail-button" class="btn-primary"><u>
+<b>Generate Trail</b></u></button>
+            <p><i>Powered by OpenAI Artificial Intelligence</i></p>
+                </form>
+            </div>
+
+            <!-- Panel 2: Map View -->
+            <div class="panel map-panel">
+                <h2>Starting Point</h2>
+                <div id="map-view" class="map-view"></div>
+                <input type="hidden" id="starting-point-coords">
+            </div>
+        </div>
+    </section>
+
+    <!-- Trail Details Panels -->
+    <section class="trail-details">
+        <div class="panel" id="trail-info-panel">
+            <h2>Trail Details</h2>
+            <p><strong>Name:</strong> <span id="trail-name"></span></p>
+            <p><strong>Theme:</strong> <span id="trail-theme"></span></p>
+            <p><strong>Mode:</strong> <span id="trail-mode"></span></p>
+            <p><strong>Distance:</strong> <span id="trail-distance"></span></p>
+            <p><strong>Difficulty:</strong> <span id="trail-difficulty"></span></p>
+            <p><strong>Description:</strong> <span id="trail-description"></span></p>
+        </div>
+        <div class="panel" id="subway-diagram-panel">
+            <h2>Subway Diagram</h2>
+            <div id="subway-diagram"></div>
+        </div>
+        <div class="panel" id="map-view-panel">
+            <h2>Map View</h2>
+            <div id="trail-map-view" class="map-view"></div>
+        </div>
+    </section>
+
+    <!-- Footer (Same as index.html) -->
+    <footer>
+        <p>&copy; 2025 TrailTree. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="scripts/test-openai-call.js"></script>
+</body>
+</html>
