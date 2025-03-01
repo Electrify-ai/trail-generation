@@ -28,7 +28,7 @@ async function fetchSecrets() {
     }
 }
 
-// Function to initialize Mapbox
+// Function to initialize Mapbox and handle starting point selection
 function initializeMapbox(mapboxAccessToken) {
     mapboxgl.accessToken = mapboxAccessToken;
     const map = new mapboxgl.Map({
@@ -181,23 +181,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Fetch secrets (OpenAI API key and Mapbox access token)
         const { openAiApiKey, mapboxAccessToken } = await fetchSecrets();
 
-        // Initialize Mapbox
-        const { startingPointCoords } = initializeMapbox(mapboxAccessToken);
+        // Initialize Mapbox and get the map instance
+        const { map, startingPointCoords } = initializeMapbox(mapboxAccessToken);
 
         // Generate Trail Button
         document.getElementById('generate-trail-button').addEventListener('click', async () => {
             console.log('Generate Trail button clicked.');
 
+            // Get user inputs
             const transportMode = document.getElementById('transport-mode').value;
             const duration = document.getElementById('duration').value;
             const difficulty = document.getElementById('difficulty').value;
 
+            // Check if a starting point has been selected
             if (!startingPointCoords) {
                 alert('Please select a starting point on the map.');
                 return;
             }
 
             try {
+                // Call OpenAI API to generate trail
                 const trailData = await generateTrailWithAI(startingPointCoords, transportMode, duration, difficulty, openAiApiKey);
                 if (trailData) {
                     displayTrailDetails(trailData);
