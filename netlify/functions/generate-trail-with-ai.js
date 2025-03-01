@@ -3,8 +3,52 @@ const fetch = require('node-fetch'); // Import node-fetch
 exports.handler = async function (event, context) {
     console.log('Incoming event body:', event.body); // Debugging
 
+    // Parse the incoming request body
+    let { coords, mode, duration, difficulty, apiKey } = JSON.parse(event.body || '{}');
+    console.log('Parsed body:', { coords, mode, duration, difficulty, apiKey }); // Debugging
+
+    // If coords is a string, parse it into an array
+    if (typeof coords === 'string') {
+        coords = coords.split(',').map(Number);
+    }
+
+    // Validate required fields
+    if (!Array.isArray(coords)) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ error: 'coords must be an array' }),
+        };
+    }
+
+    if (!mode || !duration || !difficulty || !apiKey) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ error: 'Missing required fields' }),
+        };
+    }
+
     // Construct the prompt for OpenAI
-    const prompt = `Generate a trail starting at coordinates ${coords.join(', ')} `;
+    const prompt = `Generate a trail starting at coordinates ${coords.join(', ')} with the following criteria:
+- Mode of transport: ${mode}
+- Duration: ${duration}
+- Difficulty: ${difficulty}
+
+Provide the trail details in JSON format with the following fields:
+- name: The name of the trail
+- theme: The theme of the trail
+- mode: The mode of transport
+- distance: The distance of the trail
+- difficulty: The difficulty level
+- description: A description of the trail
+- waypoints: An array of waypoints, each with a name and coordinates`;
 
     try {
         // Call the OpenAI API using node-fetch
@@ -23,7 +67,7 @@ exports.handler = async function (event, context) {
             }),
         });
 
-        const responseText = await response.text();
+        const responseText = await response.json();
         console.log('OpenAI response:', responseText); // Debugging
 
         if (!response.ok) {
