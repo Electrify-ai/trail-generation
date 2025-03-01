@@ -101,6 +101,10 @@ async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
     const prompt = 'Provide a JSON object with a single field "name" containing the name of a trail.';
 
     try {
+        console.log('Sending request to OpenAI:');
+        console.log('Prompt:', prompt);
+        console.log('API Key:', apiKey);
+
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -108,11 +112,11 @@ async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
                 'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: 'gpt-3.5-turbo', // Use 'gpt-3.5-turbo' for compatibility
+                model: 'gpt-3.5-turbo',
                 messages: [{ role: 'user', content: prompt }],
-                max_tokens: 200, // Increase max_tokens for longer responses
-                temperature: 0.7, // Adjust temperature for creativity
-                response_format: { type: 'json_object' }, // Ensure JSON response
+                max_tokens: 200,
+                temperature: 0.7,
+                response_format: { type: 'json_object' },
             }),
         });
 
@@ -125,8 +129,11 @@ async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
 
         const data = JSON.parse(responseText);
         console.log('Parsed data:', data);
+
+        return data;
     } catch (error) {
         console.error('Error:', error);
+        throw error; // Re-throw the error to handle it in the calling function
     }
 }
 
