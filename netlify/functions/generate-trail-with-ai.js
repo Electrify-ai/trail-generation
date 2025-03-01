@@ -68,12 +68,22 @@ Provide the trail details in JSON format with the following fields:
         });
 
         const responseText = await response.text();
+        console.log('OpenAI response:', responseText); // Debugging
 
         if (!response.ok) {
+            console.error('OpenAI API error:', responseText); // Debugging
             throw new Error(`API request failed: ${response.status} - ${responseText}`);
         }
 
         const data = JSON.parse(responseText);
+
+        // Validate the OpenAI response
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            throw new Error('Invalid response format from OpenAI API');
+        }
+
+        const trailData = JSON.parse(data.choices[0].message.content);
+        console.log('Parsed trail data:', trailData); // Debugging
 
         return {
             statusCode: 200,
@@ -81,9 +91,10 @@ Provide the trail details in JSON format with the following fields:
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(trailData),
         };
     } catch (error) {
+        console.error('Function error:', error); // Debugging
         return {
             statusCode: 500,
             headers: {
