@@ -1,11 +1,11 @@
 // fetch-secrets.js
 const { createClient } = require('@supabase/supabase-js');
-const fetch = require('node-fetch'); // Add node-fetch
 
 exports.handler = async function (event, context) {
-    // Initialize Supabase client
-    const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // Parse the incoming request body to get Supabase credentials
+    const { supabaseUrl, supabaseKey } = JSON.parse(event.body || '{}');
+
+    // Initialize Supabase client with the provided credentials
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     try {
@@ -29,6 +29,10 @@ exports.handler = async function (event, context) {
 
         return {
             statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*', // Adjust if needed for security
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({
                 openAiApiKey: openAiData.value,
                 mapboxAccessToken: mapboxData.value,
@@ -37,6 +41,10 @@ exports.handler = async function (event, context) {
     } catch (error) {
         return {
             statusCode: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*', // Adjust if needed for security
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ error: error.message }),
         };
     }

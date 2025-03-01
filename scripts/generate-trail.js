@@ -14,12 +14,20 @@ async function fetchSupabaseConfig() {
 }
 
 // Function to fetch secrets (OpenAI API key and Mapbox access token)
-async function fetchSecrets() {
+async function fetchSecrets(supabaseUrl, supabaseKey) {
     try {
-        const response = await fetch('/.netlify/functions/fetch-secrets');
+        const response = await fetch('/.netlify/functions/fetch-secrets', {
+            method: 'POST', // Use POST to send credentials in the body
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ supabaseUrl, supabaseKey }), // Pass credentials
+        });
+
         if (!response.ok) {
             throw new Error(`Failed to fetch secrets: ${response.status}`);
         }
+
         return await response.json();
     } catch (error) {
         console.error('Error fetching secrets:', error);
@@ -176,11 +184,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         // Fetch Supabase credentials
         const { supabaseUrl, supabaseKey } = await fetchSupabaseConfig();
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        console.log('Supabase initialized:', supabaseClient);
 
         // Fetch secrets (OpenAI API key and Mapbox access token)
-        const { openAiApiKey, mapboxAccessToken } = await fetchSecrets();
+        const { openAiApiKey, mapboxAccessToken } = await fetchSecrets(supabaseUrl, supabaseKey);
 
         // Initialize Mapbox and get the map instance
         const { map, startingPointCoords } = initializeMapbox(mapboxAccessToken);
