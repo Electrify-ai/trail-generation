@@ -97,15 +97,10 @@ window.addEventListener('load', async () => {
 // Function to generate trail with OpenAI
 async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
     console.log('Calling OpenAI API...');
-    console.log('API Key:', apiKey);
     
-//    const apiKey = process.env.TEMP_API_KEY; // Replace with your actual API key
     const prompt = 'Provide a JSON object with a single field "name" containing the name of a trail.';
 
     try {
-        console.log('Sending request to OpenAI:');
-        console.log('Prompt:', prompt);
-
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -121,35 +116,17 @@ async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
             }),
         });
 
-        console.log('OpenAI response status:', response.status);
-
-        // Log the raw response text for debugging
         const responseText = await response.text();
-        console.log('OpenAI response text:', responseText);
+        console.log('OpenAI response:', responseText);
 
         if (!response.ok) {
-            throw new Error(`OpenAI API request failed: ${response.status} - ${responseText}`);
+            throw new Error(`API request failed: ${response.status} - ${responseText}`);
         }
 
-        // Parse the response text as JSON
         const data = JSON.parse(responseText);
-        console.log('Data retrieved from OpenAI:', data);
-
-        if (!data.choices || data.choices.length === 0) {
-            throw new Error('No choices in OpenAI response');
-        }
-
-        // Parse the JSON content from the response
-        const trailData = JSON.parse(data.choices[0].message.content);
-        if (!trailData || !trailData.name) {
-            throw new Error('Invalid trail data received');
-        }
-
-        return trailData;
+        console.log('Parsed data:', data);
     } catch (error) {
-        console.error('Error fetching data from OpenAI:', error);
-        alert('An error occurred while fetching data. Please check the console for details.');
-        return null;
+        console.error('Error:', error);
     }
 }
 
