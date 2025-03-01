@@ -167,6 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const { supabaseUrl, supabaseKey } = await fetchSupabaseConfig();
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         console.log('Supabase initialized:', supabaseClient);
+        console.log('supabase url',supabaseUrl);
 
         // Fetch secrets (OpenAI API key and Mapbox access token)
         const { openAiApiKey, mapboxAccessToken } = await fetchSecrets();
