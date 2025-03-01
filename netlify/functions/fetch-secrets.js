@@ -3,11 +3,9 @@
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async function (event, context) {
-    // Parse the incoming request body to get Supabase credentials
-    const { supabaseUrl, supabaseKey } = JSON.parse(event.body || '{}');
-    console.log('supabase url',supabaseUrl);
-
-    // Initialize Supabase client with the provided credentials
+    // Initialize Supabase client
+    const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     try {
@@ -31,10 +29,6 @@ exports.handler = async function (event, context) {
 
         return {
             statusCode: 200,
-            headers: {
-                'Access-Control-Allow-Origin': '*', // Adjust if needed for security
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
                 openAiApiKey: openAiData.value,
                 mapboxAccessToken: mapboxData.value,
@@ -43,11 +37,7 @@ exports.handler = async function (event, context) {
     } catch (error) {
         return {
             statusCode: 500,
-            headers: {
-                'Access-Control-Allow-Origin': '*', // Adjust if needed for security
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({ error: error.message }),
         };
     }
-};
+}
