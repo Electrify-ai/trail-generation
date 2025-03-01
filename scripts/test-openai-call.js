@@ -1,104 +1,38 @@
-// Wait for the DOM and all scripts to load
-window.addEventListener('load', async () => {
-    console.log('Page fully loaded. Initializing Supabase...');
+document.getElementById('generate-trail-button').addEventListener('click', async () => {
+    console.log('Generate Trail button clicked.');
 
-    // Fetch Supabase URL and key from Netlify environment variables
-    let supabaseUrl, supabaseKey;
+    const transportMode = 'walking'; // Replace with user input
+    const duration = '0-1'; // Replace with user input
+    const difficulty = 'easy'; // Replace with user input
+    const startingPointCoords = [153.01725985443449, -27.44093021928935]; // Replace with user input
 
     try {
-        // Fetch credentials from Netlify Function
-        const response = await fetch('/.netlify/functions/fetch-supabase-config');
-        if (!response.ok) {
-            throw new Error(`Failed to fetch credentials: ${response.status}`);
-        }
-
-        const data = await response.json();
-        supabaseUrl = data.supabaseUrl;
-        supabaseKey = data.supabaseKey;
-
-        if (!supabaseUrl || !supabaseKey) {
-            throw new Error('Missing Supabase credentials.');
+        const trailData = await generateTrailWithAI(startingPointCoords, transportMode, duration, difficulty);
+        if (trailData) {
+            displayTrailDetails(trailData);
         }
     } catch (error) {
-        console.error('Error fetching Supabase credentials:', error);
-        alert('Could not initialize Supabase. Please try again.');
-        return;
+        console.error('Error generating trail:', error);
+        alert('Failed to generate trail. Please try again.');
     }
-
-    // Initialize Supabase client
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-    console.log('Supabase initialized:', supabaseClient);
-
-    // Fetch secrets (OpenAI API key and Mapbox access token) from Netlify function
-    let openAiApiKey, mapboxAccessToken;
-    try {
-        const secretsResponse = await fetch('/.netlify/functions/fetch-secrets');
-        if (!secretsResponse.ok) {
-            throw new Error(`Failed to fetch secrets: ${secretsResponse.status}`);
-        }
-
-        const secretsData = await secretsResponse.json();
-        openAiApiKey = secretsData.openAiApiKey;
-        mapboxAccessToken = secretsData.mapboxAccessToken;
-
-        if (!openAiApiKey || !mapboxAccessToken) {
-            throw new Error('Failed to retrieve secrets from Supabase.');
-        }
-    } catch (error) {
-        console.error('Error fetching secrets:', error);
-        alert('Failed to initialize application. Please try again.');
-        return;
-    }
-
-    // Initialize Mapbox with the fetched access token
-    mapboxgl.accessToken = mapboxAccessToken;
-    const map = new mapboxgl.Map({
-        container: 'map-view',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [153.0260, -27.4705], // Brisbane, Australia coordinates
-        zoom: 12, // Adjust zoom level as needed
-    });
-
-    let startingPointCoords = null;
-
-    // Add map click event to set starting point
-    map.on('click', (e) => {
-        startingPointCoords = [e.lngLat.lng, e.lngLat.lat];
-        document.getElementById('starting-point-coords').value = startingPointCoords;
-        new mapboxgl.Marker().setLngLat(startingPointCoords).addTo(map);
-    });
-
-    // Generate Trail Button
-    document.getElementById('generate-trail-button').addEventListener('click', async () => {
-        // Get user inputs
-        const transportMode = document.getElementById('transport-mode').value;
-        const duration = document.getElementById('duration').value;
-        const difficulty = document.getElementById('difficulty').value;
-
-        // Check if a starting point has been selected
-        if (!startingPointCoords) {
-            alert('Please select a starting point on the map.');
-            return;
-        }
-
-        // Call OpenAI API to generate trail
-        try {
-            const trailData = await generateTrailWithAI(startingPointCoords, transportMode, duration, difficulty, openAiApiKey);
-            if (trailData) {
-                displayTrailDetails(trailData);
-            }
-        } catch (error) {
-            console.error('Error generating trail:', error);
-            alert('Failed to generate trail. Please try again.');
-        }
-    });
 });
 
-// Function to generate trail with OpenAI
-async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
-    console.log('Calling OpenAI API...');
+async function generateTrailWithAI(coords, mode, duration, difficulty) {
+    console.log('Calling OpenAI API via proxy...');
     
-    const prompt = 'Provide a JSON object with a single field "name" containing the name of a trail.';
+    const prompt = `Generate a trail starting at coordinates ${coords.join(', ')} with the following criteria:
+- Mode of transport: ${mode}
+- Duration: ${duration}
+- Difficulty: ${difficulty}
+
+Provide the trail details in JSON format with the following fields:
+- name: The name of the trail
+- theme: The theme of the trail
+- mode: The mode of transport
+- distance: The distance of the trail
+- difficulty: The difficulty level
+- description: A description of the trail
+- waypoints: An array of waypoints, each with a name and coordinates`;
 
     try {
         const response = await fetch('/.netlify/functions/openai-proxy', {
@@ -132,7 +66,6 @@ async function generateTrailWithAI(coords, mode, duration, difficulty, apiKey) {
     }
 }
 
-// Function to display trail details
 function displayTrailDetails(trailData) {
     console.log('Displaying trail details:', trailData);
 
@@ -153,7 +86,6 @@ function displayTrailDetails(trailData) {
     }
 }
 
-// Function to update subway diagram
 function updateSubwayDiagram(waypoints) {
     const subwayDiagram = document.getElementById('subway-diagram');
     subwayDiagram.innerHTML = waypoints.map((waypoint, index) => `
@@ -163,7 +95,6 @@ function updateSubwayDiagram(waypoints) {
     `).join('');
 }
 
-// Function to update map with trail line
 function updateMapLine(waypoints) {
     const coordinates = waypoints.map(waypoint => waypoint.coordinates);
     const trailMap = new mapboxgl.Map({
