@@ -1,5 +1,3 @@
-// scripts/generate-trail.js
-
 document.addEventListener('DOMContentLoaded', () => {
     const generateTrailButton = document.getElementById('generate-trail-button');
 
@@ -14,15 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Step 1: Fetch Supabase configuration
             const supabaseConfigResponse = await fetch('/.netlify/functions/fetch-supabase-config');
+            if (!supabaseConfigResponse.ok) {
+                throw new Error('Failed to fetch Supabase configuration');
+            }
             const supabaseConfig = await supabaseConfigResponse.json();
+            console.log('Supabase Config:', supabaseConfig);
 
             // Step 2: Fetch secrets (OpenAI API key and Mapbox access token)
             const secretsResponse = await fetch('/.netlify/functions/fetch-secrets');
+            if (!secretsResponse.ok) {
+                throw new Error('Failed to fetch secrets');
+            }
             const secrets = await secretsResponse.json();
+            console.log('Secrets:', secrets);
 
             // Step 3: Get user's current location
             const position = await getCurrentLocation();
             const { latitude, longitude } = position.coords;
+            console.log('User Location:', { latitude, longitude });
 
             // Step 4: Send request to OpenAI API
             const openaiResponse = await fetch('/.netlify/functions/openai-proxy', {
@@ -41,17 +48,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 }),
             });
 
-            const openaiData = await openaiResponse.json();
+            if (!openaiResponse.ok) {
+                throw new Error('Failed to fetch data from OpenAI API');
+            }
 
-            // Step 5: Display the result
+            const openaiData = await openaiResponse.json();
+            console.log('OpenAI Response:', openaiData); // Log the response for debugging
+
+            // Step 5: Validate the OpenAI response
+            if (!openaiData.choices || !openaiData.choices[0] || !openaiData.choices[0].message) {
+                throw new Error('Invalid response from OpenAI API');
+            }
+
             const trailDetails = openaiData.choices[0].message.content;
+
+            // Step 6: Display the result
             document.getElementById('trail-name').textContent = trailDetails;
             document.getElementById('trail-theme').textContent = 'Tourist Attraction';
             document.getElementById('trail-mode').textContent = transportMode;
             document.getElementById('trail-difficulty').textContent = difficulty;
             document.getElementById('trail-description').textContent = trailDetails;
 
-            // Optionally, you can display the location on a map using Mapbox
+            // Step 7: Optionally, display the location on a map using Mapbox
             displayMap(latitude, longitude, secrets.mapboxAccessToken);
         } catch (error) {
             console.error('Error generating trail:', error);
