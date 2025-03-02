@@ -61,6 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { lng, lat } = marker.getLngLat();
                 console.log('Marker moved to:', { latitude: lat, longitude: lng });
             });
+
+            // Step 7: Move marker on map click
+            map.on('click', (event) => {
+                const { lng, lat } = event.lngLat;
+                marker.setLngLat([lng, lat]);
+                console.log('Marker moved to:', { latitude: lat, longitude: lng });
+            });
         } catch (error) {
             console.error('Error initializing map:', error);
             alert('Failed to initialize map. Please try again.');
@@ -118,7 +125,7 @@ Provide the trail details in JSON format with the following fields:
                 body: JSON.stringify({
                     model: 'gpt-3.5-turbo',
                     messages: [{ role: 'user', content: prompt }],
-                    max_tokens: 200,
+                    max_tokens: 500, // Increased max tokens to avoid truncation
                     temperature: 0.7,
                     response_format: { type: 'json_object' },
                 }),
