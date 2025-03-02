@@ -1,14 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const generateTrailButton = document.getElementById('generate-trail-button');
+    let map;
+    let marker;
+    let userLocation = null;
 
-    generateTrailButton.addEventListener('click', async (event) => {
-        event.preventDefault();
-
-        // Get form values
-        const transportMode = document.getElementById('transport-mode').value;
-        const difficulty = document.getElementById('difficulty').value;
-        const duration = document.getElementById('duration').value;
-
+    // Initialize the map and marker
+    async function initializeMap() {
         try {
             // Step 1: Fetch API keys from Netlify function
             const apiKeysResponse = await fetch('/.netlify/functions/get-api-key');
@@ -20,11 +17,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Step 2: Get user's current location
             const position = await getCurrentLocation();
-            const { latitude, longitude } = position.coords;
-            console.log('User Location:', { latitude, longitude });
+            userLocation = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+            };
+            console.log('User Location:', userLocation);
+
+            // Step 3: Initialize Mapbox map
+            mapboxgl.accessToken = apiKeys.mapboxAccessToken;
+            map = new mapboxgl.Map({
+                container: 'map-view',
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: [userLocation.longitude, userLocation.latitude],
+                zoom: 12,
+            });
+
+            // Step 4: Add a draggable marker
+            marker = new mapboxgl.Marker({
+                draggable: true,
+            })
+                .setLngLat([userLocation.longitude, userLocation.latitude])
+                .addTo(map);
+
+            // Step 5: Add a geocoder control for address search
+            const geocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl,
+                marker: false, // Disable the default marker
+            });
+
+            // Add the geocoder to the map
+            map.addControl(geocoder);
+
+            // Move the marker to the searched location
+            geocoder.on('result', (event) => {
+                const { center } = event.result;
+                marker.setLngLat(center);
+                map.flyTo({ center, zoom: 14 });
+            });
+
+            // Step 6: Handle marker drag end event
+            marker.on('dragend', () => {
+                const { lng, lat } = marker.getLngLat();
+                console.log('Marker moved to:', { latitude: lat, longitude: lng });
+            });
+        } catch (error) {
+            console.error('Error initializing map:', error);
+            alert('Failed to initialize map. Please try again.');
+        }
+    }
+
+    // Initialize the map when the page loads
+    initializeMap();
+
+    // Handle "Generate Trail" button click
+    generateTrailButton.addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        // Get form values
+        const transportMode = document.getElementById('transport-mode').value;
+        const difficulty = document.getElementById('difficulty').value;
+        const duration = document.getElementById('duration').value;
+
+        try {
+            // Step 1: Get the selected coordinates from the marker
+            const { lng, lat } = marker.getLngLat();
+            const selectedLocation = { latitude: lat, longitude: lng };
+            console.log('Selected Location:', selectedLocation);
+
+            // Step 2: Fetch API keys from Netlify function
+            const apiKeysResponse = await fetch('/.netlify/functions/get-api-key');
+            if (!apiKeysResponse.ok) {
+                throw new Error('Failed to fetch API keys');
+            }
+            const apiKeys = await apiKeysResponse.json();
+            console.log('API Keys:', apiKeys);
 
             // Step 3: Construct the prompt for OpenAI
-            const prompt = `Generate a trail starting at coordinates ${latitude}, ${longitude} with the following criteria:
+            const prompt = `Generate a trail starting at coordinates ${selectedLocation.latitude}, ${selectedLocation.longitude} with the following criteria:
 - Mode of transport: ${transportMode}
 - Duration: ${duration}
 - Difficulty: ${difficulty}
@@ -105,10 +175,7 @@ Provide the trail details in JSON format with the following fields:
             document.getElementById('trail-difficulty').textContent = trailData.difficulty;
             document.getElementById('trail-description').textContent = trailData.description;
 
-            // Step 10: Optionally, display the location on a map using Mapbox
-            displayMap(latitude, longitude, apiKeys.mapboxAccessToken);
-
-            // Step 11: Display waypoints (if available)
+            // Step 10: Display waypoints (if available)
             if (trailData.waypoints && Array.isArray(trailData.waypoints)) {
                 const waypointsList = document.createElement('ul');
                 trailData.waypoints.forEach(waypoint => {
@@ -134,17 +201,4 @@ function getCurrentLocation() {
             reject(new Error('Geolocation is not supported by this browser.'));
         }
     });
-}
-
-// Helper function to display the location on a map using Mapbox
-function displayMap(latitude, longitude, mapboxAccessToken) {
-    mapboxgl.accessToken = mapboxAccessToken;
-    const map = new mapboxgl.Map({
-        container: 'trail-map-view',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [longitude, latitude],
-        zoom: 12,
-    });
-
-    new mapboxgl.Marker().setLngLat([longitude, latitude]).addTo(map);
 }
