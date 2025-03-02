@@ -10,49 +10,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const duration = document.getElementById('duration').value;
 
         try {
-            // Step 1: Fetch Supabase configuration from environment variables
-            const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
-            const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-            if (!supabaseUrl || !supabaseKey) {
-                throw new Error('Supabase configuration is missing');
+            // Step 1: Fetch API keys from Netlify function
+            const apiKeysResponse = await fetch('/.netlify/functions/get-api-key');
+            if (!apiKeysResponse.ok) {
+                throw new Error('Failed to fetch API keys');
             }
+            const apiKeys = await apiKeysResponse.json();
+            console.log('API Keys:', apiKeys);
 
-            console.log('Supabase Config:', { supabaseUrl, supabaseKey });
-
-            // Step 2: Initialize Supabase client
-            const supabase = createClient(supabaseUrl, supabaseKey);
-
-            // Step 3: Fetch secrets (OpenAI API key and Mapbox access token) from Supabase
-            const { data: openAiData, error: openAiError } = await supabase
-                .from('secrets')
-                .select('value')
-                .eq('name', 'openai_api_key')
-                .single();
-
-            if (openAiError) throw openAiError;
-
-            const { data: mapboxData, error: mapboxError } = await supabase
-                .from('secrets')
-                .select('value')
-                .eq('name', 'mapbox_access_token')
-                .single();
-
-            if (mapboxError) throw mapboxError;
-
-            const secrets = {
-                openAiApiKey: openAiData.value,
-                mapboxAccessToken: mapboxData.value,
-            };
-
-            console.log('Secrets:', secrets);
-
-            // Step 4: Get user's current location
+            // Step 2: Get user's current location
             const position = await getCurrentLocation();
             const { latitude, longitude } = position.coords;
             console.log('User Location:', { latitude, longitude });
 
-            // Step 5: Construct the prompt for OpenAI
+            // Step 3: Construct the prompt for OpenAI
             const prompt = `Generate a trail starting at coordinates ${latitude}, ${longitude} with the following criteria:
 - Mode of transport: ${transportMode}
 - Duration: ${duration}
@@ -67,12 +38,12 @@ Provide the trail details in JSON format with the following fields:
 - description: A description of the trail
 - waypoints: An array of waypoints, each with a name and coordinates`;
 
-            // Step 6: Send request to OpenAI API directly
+            // Step 4: Send request to OpenAI API directly
             const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${secrets.openAiApiKey}`,
+                    'Authorization': `Bearer ${apiKeys.openAiApiKey}`,
                 },
                 body: JSON.stringify({
                     model: 'gpt-3.5-turbo',
@@ -92,7 +63,7 @@ Provide the trail details in JSON format with the following fields:
             const openaiData = await openaiResponse.json();
             console.log('OpenAI Response:', openaiData); // Log the response for debugging
 
-            // Step 7: Validate the OpenAI response
+            // Step 5: Validate the OpenAI response
             if (!openaiData.choices || !openaiData.choices[0] || !openaiData.choices[0].message) {
                 throw new Error('Invalid response from OpenAI API');
             }
@@ -100,7 +71,7 @@ Provide the trail details in JSON format with the following fields:
             const trailData = JSON.parse(openaiData.choices[0].message.content);
             console.log('Parsed Trail Data:', trailData); // Log the parsed trail data
 
-            // Step 8: Display the result
+            // Step 6: Display the result
             document.getElementById('trail-name').textContent = trailData.name;
             document.getElementById('trail-theme').textContent = trailData.theme;
             document.getElementById('trail-mode').textContent = trailData.mode;
@@ -108,10 +79,10 @@ Provide the trail details in JSON format with the following fields:
             document.getElementById('trail-difficulty').textContent = trailData.difficulty;
             document.getElementById('trail-description').textContent = trailData.description;
 
-            // Step 9: Optionally, display the location on a map using Mapbox
-            displayMap(latitude, longitude, secrets.mapboxAccessToken);
+            // Step 7: Optionally, display the location on a map using Mapbox
+            displayMap(latitude, longitude, apiKeys.mapboxAccessToken);
 
-            // Step 10: Display waypoints (if available)
+            // Step 8: Display waypoints (if available)
             if (trailData.waypoints && Array.isArray(trailData.waypoints)) {
                 const waypointsList = document.createElement('ul');
                 trailData.waypoints.forEach(waypoint => {
