@@ -1,5 +1,4 @@
 // fetch-secrets.js
-
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async function (event, context) {
@@ -29,6 +28,10 @@ exports.handler = async function (event, context) {
 
         return {
             statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*', // Allow all origins (adjust for production)
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({
                 openAiApiKey: openAiData.value,
                 mapboxAccessToken: mapboxData.value,
@@ -37,7 +40,11 @@ exports.handler = async function (event, context) {
     } catch (error) {
         return {
             statusCode: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*', // Allow all origins (adjust for production)
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ error: error.message }),
         };
     }
-}
+};
