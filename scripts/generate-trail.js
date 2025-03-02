@@ -36,7 +36,7 @@ Provide the trail details in JSON format with the following fields:
 - distance: The distance of the trail
 - difficulty: The difficulty level
 - description: A description of the trail
-- waypoints: An array of waypoints, each with a name and coordinates`;
+- waypoints: An array of waypoints, each with a name and coordinates (coordinates must be an array of two numbers, e.g., [-27.4370558, 153.00084999999999])`;
 
             // Step 4: Send request to OpenAI API directly
             const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -79,12 +79,25 @@ Provide the trail details in JSON format with the following fields:
                 throw new Error('Failed to parse trail data. The response may be malformed.');
             }
 
-            // Step 7: Validate the parsed trail data
+            // Step 7: Validate and sanitize the trail data
             if (!trailData.name || !trailData.theme || !trailData.mode || !trailData.distance || !trailData.difficulty || !trailData.description) {
                 throw new Error('Invalid trail data format');
             }
 
-            // Step 8: Display the result
+            // Step 8: Sanitize waypoints (if available)
+            if (trailData.waypoints && Array.isArray(trailData.waypoints)) {
+                trailData.waypoints = trailData.waypoints.map(waypoint => {
+                    if (typeof waypoint.coordinates === 'string') {
+                        // Convert coordinates string to an array of numbers
+                        waypoint.coordinates = waypoint.coordinates
+                            .split(',')
+                            .map(coord => parseFloat(coord.trim()));
+                    }
+                    return waypoint;
+                });
+            }
+
+            // Step 9: Display the result
             document.getElementById('trail-name').textContent = trailData.name;
             document.getElementById('trail-theme').textContent = trailData.theme;
             document.getElementById('trail-mode').textContent = trailData.mode;
@@ -92,10 +105,10 @@ Provide the trail details in JSON format with the following fields:
             document.getElementById('trail-difficulty').textContent = trailData.difficulty;
             document.getElementById('trail-description').textContent = trailData.description;
 
-            // Step 9: Optionally, display the location on a map using Mapbox
+            // Step 10: Optionally, display the location on a map using Mapbox
             displayMap(latitude, longitude, apiKeys.mapboxAccessToken);
 
-            // Step 10: Display waypoints (if available)
+            // Step 11: Display waypoints (if available)
             if (trailData.waypoints && Array.isArray(trailData.waypoints)) {
                 const waypointsList = document.createElement('ul');
                 trailData.waypoints.forEach(waypoint => {
