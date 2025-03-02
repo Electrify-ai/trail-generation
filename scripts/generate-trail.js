@@ -68,10 +68,23 @@ Provide the trail details in JSON format with the following fields:
                 throw new Error('Invalid response from OpenAI API');
             }
 
-            const trailData = JSON.parse(openaiData.choices[0].message.content);
-            console.log('Parsed Trail Data:', trailData); // Log the parsed trail data
+            // Step 6: Parse the JSON content from the OpenAI response
+            let trailData;
+            try {
+                trailData = JSON.parse(openaiData.choices[0].message.content);
+                console.log('Parsed Trail Data:', trailData); // Log the parsed trail data
+            } catch (parseError) {
+                console.error('Failed to parse OpenAI response:', parseError);
+                console.error('Raw OpenAI response content:', openaiData.choices[0].message.content);
+                throw new Error('Failed to parse trail data. The response may be malformed.');
+            }
 
-            // Step 6: Display the result
+            // Step 7: Validate the parsed trail data
+            if (!trailData.name || !trailData.theme || !trailData.mode || !trailData.distance || !trailData.difficulty || !trailData.description) {
+                throw new Error('Invalid trail data format');
+            }
+
+            // Step 8: Display the result
             document.getElementById('trail-name').textContent = trailData.name;
             document.getElementById('trail-theme').textContent = trailData.theme;
             document.getElementById('trail-mode').textContent = trailData.mode;
@@ -79,10 +92,10 @@ Provide the trail details in JSON format with the following fields:
             document.getElementById('trail-difficulty').textContent = trailData.difficulty;
             document.getElementById('trail-description').textContent = trailData.description;
 
-            // Step 7: Optionally, display the location on a map using Mapbox
+            // Step 9: Optionally, display the location on a map using Mapbox
             displayMap(latitude, longitude, apiKeys.mapboxAccessToken);
 
-            // Step 8: Display waypoints (if available)
+            // Step 10: Display waypoints (if available)
             if (trailData.waypoints && Array.isArray(trailData.waypoints)) {
                 const waypointsList = document.createElement('ul');
                 trailData.waypoints.forEach(waypoint => {
